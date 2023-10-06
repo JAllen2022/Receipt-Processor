@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const { saveReceipt, getPoints } = require("./receipts.js");
-const { validateReceipt } = require("./helper-functions.js");
+const { validateReceipt } = require("./validators.js");
 
 const app = express();
 const PORT = 3000;
