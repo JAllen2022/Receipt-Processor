@@ -52,12 +52,10 @@ function calculatePoints(receipt) {
     const purchaseTime = receipt.purchaseTime
       .split(":")
       .map((num) => parseInt(num));
-    console.log("Checking purchase time", purchaseTime);
     const hour = purchaseTime[0];
     const minute = purchaseTime[1];
     if ((hour === 14 && minute > 0) || hour === 15) {
       points += 10;
-      console.log("we adding 10 for time");
     }
   }
 
