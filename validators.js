@@ -12,7 +12,7 @@ function validateReceipt(req, res, next) {
   ];
 
   // Patterns expected for all fields
-  const retailerPattern = /^\\S+$/; // ^[a-zA-Z0-9& ]+$ <-- to allow for the & character in example. However, to follow specifications in api.yml file, I'm using the pattern in this line.
+  const retailerPattern = /^[a-zA-Z0-9& ]+$/; //  <-- This differs from what is in API file to account for example case in the instructions README file.
   const datePattern = /^\d{4}-\d{2}-\d{2}$/;
   const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
   const shortDescriptionPattern = /^[\w\s\-]+$/;
