@@ -49,10 +49,15 @@ function calculatePoints(receipt) {
 
   // Rule 7: 10 points if the time of purchase is after 2:00pm and before 4:00pm.
   if (typeof receipt.purchaseTime === "string") {
-    const purchaseTime = receipt.purchaseTime.split(":");
-    const time = parseInt(purchaseTime[0]);
-    if (time[0] >= 14 && time[0] < 16) {
+    const purchaseTime = receipt.purchaseTime
+      .split(":")
+      .map((num) => parseInt(num));
+    console.log("Checking purchase time", purchaseTime);
+    const hour = purchaseTime[0];
+    const minute = purchaseTime[1];
+    if ((hour === 14 && minute > 0) || hour === 15) {
       points += 10;
+      console.log("we adding 10 for time");
     }
   }
 
@@ -72,6 +77,13 @@ function validateReceipt(req, res, next) {
     "total",
   ];
 
+  // Patterns expected for all fields
+  const retailerPattern = /^[a-zA-Z0-9& ]+$/;
+  const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+  const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
+  const shortDescriptionPattern = /^[\w\s\-]+$/;
+  const pricePattern = /^\d+\.\d{2}$/;
+
   // Check if all required fields are present
   for (let field of requiredFields) {
     if (!receipt[field]) {
@@ -80,12 +92,14 @@ function validateReceipt(req, res, next) {
   }
 
   // Validate retailer
-  if (typeof receipt.retailer !== "string" || !/^\S+$/.test(receipt.retailer)) {
+  if (
+    typeof receipt.retailer !== "string" ||
+    !retailerPattern.test(receipt.retailer)
+  ) {
     return res.status(400).json({ error: "Invalid retailer format." });
   }
 
   // Validate purchaseDate
-  const datePattern = /^\d{4}-\d{2}-\d{2}$/;
   if (!datePattern.test(receipt.purchaseDate)) {
     return res.status(400).json({
       error: "Invalid purchase date format. Expected YYYY-MM-DD.",
@@ -93,7 +107,6 @@ function validateReceipt(req, res, next) {
   }
 
   // Validate purchaseTime
-  const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
   if (!timePattern.test(receipt.purchaseTime)) {
     return res.status(400).json({
       error: "Invalid purchase time format. Expected HH:MM in 24-hour format.",
@@ -120,14 +133,14 @@ function validateReceipt(req, res, next) {
 
     if (
       typeof item.shortDescription !== "string" ||
-      !/^[\w\s\-]+$/.test(item.shortDescription)
+      !shortDescriptionPattern.test(item.shortDescription)
     ) {
       return res.status(400).json({
         error: "Invalid shortDescription format in items.",
       });
     }
 
-    if (typeof item.price !== "string" || !/^\d+\.\d{2}$/.test(item.price)) {
+    if (typeof item.price !== "string" || !pricePattern.test(item.price)) {
       return res.status(400).json({
         error: "Invalid price format in items. Expected XX.XX.",
       });
@@ -135,10 +148,7 @@ function validateReceipt(req, res, next) {
   }
 
   // Validate total
-  if (
-    typeof receipt.total !== "string" ||
-    !/^\d+\.\d{2}$/.test(receipt.total)
-  ) {
+  if (typeof receipt.total !== "string" || !pricePattern.test(receipt.total)) {
     return res.status(400).json({
       error: "Invalid total. Expected XX.XX.",
     });
